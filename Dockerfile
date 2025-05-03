@@ -38,12 +38,12 @@ FROM base AS downloader
 
 WORKDIR /comfyui
 
-RUN mkdir -p models/checkpoints models/vae models/WAN
+RUN mkdir -p models/checkpoints models/vae models/diffusion_models models/text_encoders models/clip_vision
 
-RUN wget -O models/WAN/umt5-xxl-enc-bf16.safetensors https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors 
-RUN wget -O models/WAN/open-clip-xlm-roberta-large-vit-huge-14_visual_fp16.safetensors https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/open-clip-xlm-roberta-large-vit-huge-14_visual_fp16.safetensors 
-RUN wget -O models/WAN/Wan2_1_VAE_bf16.safetensors https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1_VAE_bf16.safetensors 
-RUN wget -O models/WAN/wan2.1_i2v_480p_14B_bf16.safetensors https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_480p_14B_bf16.safetensors 
+RUN wget -O models/text_encoders/umt5-xxl-enc-bf16.safetensors https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors 
+RUN wget -O models/clip_vision/open-clip-xlm-roberta-large-vit-huge-14_visual_fp16.safetensors https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/open-clip-xlm-roberta-large-vit-huge-14_visual_fp16.safetensors 
+RUN wget -O models/vae/Wan2_1_VAE_bf16.safetensors https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1_VAE_bf16.safetensors 
+RUN wget -O models/diffusion_models/wan2.1_i2v_480p_14B_bf16.safetensors https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_480p_14B_bf16.safetensors 
 # Stage 3: Final image
 FROM base AS final
 
