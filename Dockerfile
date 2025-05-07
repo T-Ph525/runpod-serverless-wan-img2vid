@@ -1,52 +1,31 @@
-# Stage 1: Setup base with ComfyUI
-FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04 AS base
+# ---------- Base image ----------
+FROM runpod/comfyui:latest
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV PIP_PREFER_BINARY=1
+# ---------- Install LexTools and aria2 ----------
+RUN apt-get update && apt-get install -y git ffmpeg libglib2.0-0 libsm6 libxrender1 libxext6 aria2 && \
+    pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118 && \
+    pip install --no-cache-dir git+https://github.com/SOELexicon/ComfyUI-LexTools.git
+
+# ---------- Create model directories ----------
+RUN mkdir -p /workspace/models/vae /workspace/models/unet /workspace/models/clip /workspace/models/vision
+
+# ---------- Download model weights using aria2 ----------
+RUN aria2c -x 16 -s 16 -d /workspace/models/unet -o wan2.1_i2v_480p_14B_bf16.safetensors \
+      "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_480p_14B_bf16.safetensors" && \
+    aria2c -x 16 -s 16 -d /workspace/models/vae -o wan_2.1_vae.safetensors \
+      "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors" && \
+    aria2c -x 16 -s 16 -d /workspace/models/clip -o umt5_xxl_fp8_e4m3fn_scaled.safetensors \
+      "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors" && \
+    aria2c -x 16 -s 16 -d /workspace/models/vision -o clip_vision_h.safetensors \
+      "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors"
+
+# ---------- Copy custom workflows and handler ----------
+COPY ./workflows /workspace/workflows
+COPY ./rp_handler.py /workspace/rp_handler.py
+
+# ---------- Copy custom nodes ----------
+COPY ./custom_nodes /workspace/custom_nodes
+
+# ---------- Set entrypoint for RunPod ----------
 ENV PYTHONUNBUFFERED=1
-ENV CMAKE_BUILD_PARALLEL_LEVEL=8
-
-RUN apt-get update && apt-get install -y \
-    python3.10 python3-pip git wget libgl1 libgl1-mesa-glx libglib2.0-0 \
-    && ln -sf /usr/bin/python3.10 /usr/bin/python \
-    && ln -sf /usr/bin/pip3 /usr/bin/pip \
-    && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
-
-
-RUN pip install comfy-cli
-
-RUN /usr/bin/yes | comfy --workspace /comfyui install --cuda-version 11.8 --nvidia --version 0.3.27
-
-WORKDIR /comfyui
-
-RUN pip install runpod requests insightface
-
-ADD src/extra_model_paths.yaml ./
-WORKDIR /
-
-ADD src/start.sh src/restore_snapshot.sh src/rp_handler.py test_input.json ./
-RUN chmod +x /start.sh /restore_snapshot.sh
-
-ADD *snapshot*.json /
-
-RUN /restore_snapshot.sh
-
-CMD ["/start.sh"]
-
-# Stage 2: Download models
-FROM base AS downloader
-
-WORKDIR /comfyui
-
-RUN mkdir -p models/checkpoints models/vae models/diffusion_models models/text_encoders models/clip_vision
-
-RUN wget -O models/text_encoders/umt5-xxl-enc-bf16.safetensors https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors 
-RUN wget -O models/clip_vision/open-clip-xlm-roberta-large-vit-huge-14_visual_fp16.safetensors https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/open-clip-xlm-roberta-large-vit-huge-14_visual_fp16.safetensors 
-RUN wget -O models/vae/Wan2_1_VAE_bf16.safetensors https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1_VAE_bf16.safetensors 
-RUN wget -O models/diffusion_models/wan2.1_i2v_480p_14B_bf16.safetensors https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_480p_14B_bf16.safetensors 
-# Stage 3: Final image
-FROM base AS final
-
-COPY --from=downloader /comfyui/models /comfyui/models
-
-CMD ["/start.sh"]
+CMD ["python3", "/workspace/rp_handler.py"]
