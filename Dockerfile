@@ -1,5 +1,5 @@
 # ---------- Base image ----------
-FROM runpod/comfyui:latest
+FROM nvidia/cuda:11.8.0-cudnn8-runtime-ubuntu22.04 AS base
 
 # ---------- Install LexTools and aria2 ----------
 RUN apt-get update && apt-get install -y git ffmpeg libglib2.0-0 libsm6 libxrender1 libxext6 aria2 && \
