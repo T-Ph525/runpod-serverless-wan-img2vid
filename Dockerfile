@@ -34,7 +34,7 @@ RUN aria2c -x 16 -s 16 -d /workspace/models/unet -o wan2.1_i2v_480p_14B_bf16.saf
       "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors"
 
 # ---------- Copy handler ----------
-COPY ./rp_handler.py /workspace/rp_handler.py
+COPY /src/rp_handler.py /workspace/rp_handler.py
 
 # ---------- Set entrypoint for RunPod ----------
 ENV PYTHONUNBUFFERED=1
