@@ -39,8 +39,8 @@ WORKDIR /comfyui
 RUN mkdir -p models/checkpoints models/vae models/unet models/clip models/vision
 
 # --- WAN (lighter I2V, better T2V) ---
-RUN aria2c -x 16 -s 16 -d models/unet -o wan2.1_i2v_480p_7B_fp16.safetensors https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_480p_7B_fp16.safetensors
-RUN aria2c -x 16 -s 16 -d models/unet -o wan2.1_t2v_3.6B_fp16.safetensors https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_t2v_3.6B_fp16.safetensors
+RUN aria2c -x 16 -s 16 -d models/unet -o wan2.1_t2v_14B_fp8_e4m3fn.safetensors https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_t2v_14B_fp8_e4m3fn.safetensors
+RUN aria2c -x 16 -s 16 -d models/unet -o wan2.1_i2v_480p_14B_fp8.safetensors https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_i2v_480p_14B_fp8.safetensors
 RUN aria2c -x 16 -s 16 -d models/vae -o wan_2.1_vae.safetensors https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors
 RUN aria2c -x 16 -s 16 -d models/clip -o umt5_xxl_fp8_e4m3fn_scaled.safetensors https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors
 RUN aria2c -x 16 -s 16 -d models/vision -o clip_vision_h.safetensors https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors
